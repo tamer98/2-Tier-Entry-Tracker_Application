@@ -65,7 +65,7 @@ jobs:
           aws-region: us-east-1
         
       - name: Authenticate Docker to AWS ECR
-        run: ${{ secrets.DOCKER_AUTENTICATES_AWS }}
+        run: ${{ secrets.DOCKER_AUTENTICATES_ECR_AWS }}
    
       - name: Tag Docker image
         run: docker tag entrytracker:latest 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
@@ -103,17 +103,17 @@ jobs:
             REMOTE_USER: ec2-user
             # SOURCE: .  
             TARGET: /home/ec2-user/entryTracker
-            run: |
-              # pushd /home/ec2-user/myapp
-              #Pull the latest image from ECR
-              docker compose down -v
-              docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
-              docker ps -a
-              docker compose up -d
-              docker ps -a
+            # run: |
+            #   # pushd /home/ec2-user/myapp
+            #   #Pull the latest image from ECR
+            #   docker compose down -v
+            #   docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
+            #   docker ps -a
+            #   docker compose up -d
+            #   docker ps -a
               
-              #tests
-              curl http://localhost:5000
+            #   #tests
+            #   curl http://localhost:5000
             
             
       # - name: Run Docker on EC2
