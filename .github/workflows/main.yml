@@ -1,0 +1,138 @@
+name: EntryTracker CI/CD
+on:
+  push:
+    branches:
+      - main
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out code and pull
+        uses: actions/checkout@v2
+
+#
+      - name: install dependencies and Build the application
+        run: |
+          python -m venv venv
+          source venv/bin/activate #Sets the correct Python interpreter,correct dependencies,Updates environment variables
+          pip install -r requirements.txt
+          python app.py &
+
+      - name: wait for server to be upload
+        run: sleep 5
+ 
+#-
+      - name: Run tests
+        run: |
+          curl http://localhost:5000
+
+      - name: Stop application
+        run: kill -9 $(lsof -t -i :5000)
+
+
+#
+      - name: Build Docker image
+        run: |
+          docker build -t entrytracker:latest .
+
+
+#
+      - name: Deploy testing environment
+        run: docker compose up -d
+      
+      - name: Check running containers and existed images
+        run: |
+          docker ps -a
+          docker images
+        
+      - name: wait application to be upload
+        run: |
+          sleep 5
+          
+      - name: Run tests
+        run: |
+          curl http://localhost:5000
+
+      - name: Remove testing environment
+        run: docker compose down -v
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_KEY }}
+          aws-region: us-east-1
+        
+      - name: Authenticate Docker to AWS ECR
+        run: ${{ secrets.DOCKER_AUTENTICATES_AWS }}
+   
+      - name: Tag Docker image
+        run: docker tag entrytracker:latest 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
+
+      
+#Publish to ECR repository
+      - name: Push Docker image to ECR
+        run: docker push 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
+
+
+
+#
+
+  CD:
+    needs: CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out code and pull
+        uses: actions/checkout@v2
+#
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.ECR_SECRET_KEY }}
+          aws-region: us-east-1
+
+# ------
+      - name: Deploy to EC2
+        uses: easingthemes/ssh-deploy@main
+        with:
+            REMOTE_HOST: ec2-54-92-213-121.compute-1.amazonaws.com #${{ secrets.EC2_HOST_DNS }}
+            SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+            REMOTE_USER: ec2-user
+            # SOURCE: .  
+            TARGET: /home/ec2-user/entryTracker
+            run: |
+              # pushd /home/ec2-user/myapp
+              #Pull the latest image from ECR
+              docker compose down -v
+              docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
+              docker ps -a
+              docker compose up -d
+              docker ps -a
+              
+              #tests
+              curl http://localhost:5000
+            
+            
+      # - name: Run Docker on EC2
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ec2-3-82-171-159.compute-1.amazonaws.com #${{ secrets.EC2_HOST_DNS }}
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     username: ec2-user
+      #     port: 22
+      #     script: |
+      #       pushd /home/ec2-user/myapp
+      #       #Pull the latest image from ECR
+      #       docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
+      #       docker stop myapp || true
+      #       docker rm myapp || true
+      #       docker run -d --name app -p 5000:5000 myapp
+      #       #tests
+      #       curl http://localhost:5000
+
+            
+
+                
