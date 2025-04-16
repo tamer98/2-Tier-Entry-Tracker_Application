@@ -22,7 +22,7 @@ jobs:
       - name: wait for server to be upload
         run: sleep 5
  
-#
+#-
       - name: Run tests
         run: |
           curl http://localhost:5000
