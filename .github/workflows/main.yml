@@ -102,18 +102,23 @@ jobs:
             SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
             REMOTE_USER: ec2-user
             # SOURCE: .  
-            TARGET: /home/ec2-user/entryTracker
-            # run: |
-            #   # pushd /home/ec2-user/myapp
-            #   #Pull the latest image from ECR
-            #   docker compose down -v
-            #   docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
-            #   docker ps -a
-            #   docker compose up -d
-            #   docker ps -a
+            # TARGET: /home/ec2-user/entryTracker
+            ECR_IMAGE: 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
+            run: |
+              pushd /home/ec2-user/entryTracker
+              docker ps -a
+              docker compose down -v
+              docker ps -a
               
-            #   #tests
-            #   curl http://localhost:5000
+              #Pull the latest image from ECR
+              export ECR_IMAGE=$ECR_IMAGE
+              docker pull 
+              
+              docker compose up -d
+              docker ps -a
+              
+              #tests
+              curl http://localhost:5000
             
             
       # - name: Run Docker on EC2
