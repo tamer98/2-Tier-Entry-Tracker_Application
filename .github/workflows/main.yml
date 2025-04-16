@@ -102,7 +102,7 @@ jobs:
             SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
             REMOTE_USER: ec2-user
             # SOURCE: .  
-            # TARGET: /home/ec2-user/entryTracker
+            TARGET: /home/ec2-user/entryTracker
             ECR_IMAGE: 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
             run: |
               pushd /home/ec2-user/entryTracker
