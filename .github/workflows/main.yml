@@ -139,6 +139,7 @@ jobs:
               docker pull 
               
               docker compose up -d
+              sleep 10
               docker ps -a
               
               #tests
