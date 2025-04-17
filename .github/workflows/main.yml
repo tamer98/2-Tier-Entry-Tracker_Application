@@ -133,9 +133,15 @@ jobs:
               docker ps -a
               docker compose down -v
               docker ps -a
-              
-              #Pull the latest image from ECR
-              echo "ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest" > .env
+
+              #Pull and Tag image from ECR
+              docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
+              docker tag 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest application:latest
+
+              echo "ECR_IMAGE=application:latest" > .env
+
+              # #Pull the latest image from ECR
+              # echo "ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest" > .env
 
               docker compose up -d
               sleep 10
