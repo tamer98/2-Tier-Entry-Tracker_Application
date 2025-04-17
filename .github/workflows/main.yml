@@ -116,8 +116,8 @@ jobs:
               docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
               docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG application:latest
 
-              echo "Appending ECR_IMAGE variable to exist .env file"
-              echo "ECR_IMAGE=application:latest" >> .env
+              echo "Ensuring ECR_IMAGE is set to application:latest"
+              grep -q "^ECR_IMAGE=" .env && sed -i "s|^ECR_IMAGE=.*|ECR_IMAGE=application:latest|" .env || echo "ECR_IMAGE=application:latest" >> .env
 
               echo "Starting app with docker-compose"
               docker compose up -d
