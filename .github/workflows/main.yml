@@ -127,7 +127,6 @@ jobs:
           host: ec2-100-24-24-197.compute-1.amazonaws.com #${{ secrets.EC2_HOST_DNS }}
           key: ${{ secrets.EC2_SSH_KEY }}
           username: ec2-user
-          ECR_IMAGE: 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
           script: |
               pushd /home/ec2-user/entryTracker
               docker ps -a
@@ -135,8 +134,7 @@ jobs:
               docker ps -a
               
               #Pull the latest image from ECR
-              export ECR_IMAGE=$ECR_IMAGE
-              docker pull $ECR_IMAGE
+              docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
               
               docker compose up -d
               sleep 10
