@@ -8,7 +8,7 @@ env:
   ECR_REGISTRY: 569870184857.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY: development/mid
   IMAGE_TAG: latest  
-  
+   
 jobs:
   CI:
     runs-on: ubuntu-latest
