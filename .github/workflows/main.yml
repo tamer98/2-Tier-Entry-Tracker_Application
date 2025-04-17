@@ -135,7 +135,7 @@ jobs:
               
               #Pull the latest image from ECR
               export ECR_IMAGE=$ECR_IMAGE
-              docker pull $ECR_IMAGE
+              docker pull 
               
               docker compose up -d
               docker ps -a
