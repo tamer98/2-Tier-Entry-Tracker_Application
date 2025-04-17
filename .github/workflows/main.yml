@@ -11,7 +11,7 @@ jobs:
       - name: Check out code and pull
         uses: actions/checkout@v2
 
-#--
+
       - name: install dependencies and Build the application
         run: |
           python -m venv venv
@@ -21,8 +21,8 @@ jobs:
 
       - name: wait for server to be upload
         run: sleep 5
+
  
-#-
       - name: Run tests
         run: |
           curl http://localhost:5000
@@ -31,13 +31,11 @@ jobs:
         run: kill -9 $(lsof -t -i :5000)
 
 
-#
       - name: Build Docker image
         run: |
           docker build -t entrytracker:latest .
 
 
-#
       - name: Deploy testing environment
         run: docker compose up -d
       
@@ -57,6 +55,7 @@ jobs:
       - name: Remove testing environment
         run: docker compose down -v
 
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -69,15 +68,10 @@ jobs:
    
       - name: Tag Docker image
         run: docker tag entrytracker:latest 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
-
       
-#Publish to ECR repository
       - name: Push Docker image to ECR
         run: docker push 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
 
-
-
-#-
 
   CD:
     needs: CI
@@ -86,7 +80,8 @@ jobs:
     steps:
       - name: Check out code and pull
         uses: actions/checkout@v2
-#
+
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -94,60 +89,33 @@ jobs:
           aws-secret-access-key: ${{ secrets.ECR_SECRET_KEY }}
           aws-region: us-east-1
 
-
-# -----
-      # - name: Deploy to EC2
-      #   uses: easingthemes/ssh-deploy@main
-      #   with:
-      #       REMOTE_HOST: ec2-100-24-24-197.compute-1.amazonaws.com #${{ secrets.EC2_HOST_DNS }}
-      #       SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-      #       REMOTE_USER: ec2-user
-      #       # SOURCE: .  
-      #       TARGET: /home/ec2-user/entryTracker
-            # ECR_IMAGE: 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
-      #       run: |
-      #         pushd /home/ec2-user/entryTracker
-      #         docker ps -a
-      #         docker compose down -v
-      #         docker ps -a
-              
-      #         #Pull the latest image from ECR
-      #         export ECR_IMAGE=$ECR_IMAGE
-      #         docker pull $ECR_IMAGE
-              
-      #         docker compose up -d
-      #         docker ps -a
-              
-      #         #tests
-      #         curl http://localhost:5000
             
-            
-      - name: Run Docker on EC2
+      - name: Deploy new version of image on EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ec2-100-24-24-197.compute-1.amazonaws.com #${{ secrets.EC2_HOST_DNS }}
+          host: ${{ secrets.EC2_HOST_DNS }} #ec2-100-24-24-197.compute-1.amazonaws.com 
           key: ${{ secrets.EC2_SSH_KEY }}
           username: ec2-user
           script: |
               pushd /home/ec2-user/entryTracker
               docker ps -a
+              echo "Stopping and cleaning up existing containers"
               docker compose down -v
               docker ps -a
 
-              #Pull and Tag image from ECR
+              echo "Pulling and tagging latest image from ECR"
               docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
               docker tag 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest application:latest
 
+              echo "Appending ECR_IMAGE variable to exist .env file"
               echo "ECR_IMAGE=application:latest" >> .env
 
-              # #Pull the latest image from ECR
-              # echo "ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest" > .env
-
+              echo "Starting app with docker-compose"
               docker compose up -d
               sleep 15
               docker ps -a
               
-              #tests
+              echo "Test application"
               curl http://localhost:5000
 
             
