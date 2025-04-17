@@ -129,9 +129,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           username: ec2-user
           script: |
-              # Authenticate Docker to AWS ECR inside EC2
-              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 569870184857.dkr.ecr.us-east-1.amazonaws.com
-              
               pushd /home/ec2-user/entryTracker
               docker ps -a
               docker compose down -v
