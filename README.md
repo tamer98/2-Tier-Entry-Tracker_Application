@@ -9,8 +9,9 @@
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
 - [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
+- [Steps](#steps)
 - [CI/CD Pipeline](#cicd-pipeline)
+- [Documentation Sources](#documentation-sources)
 
 
 ## Overview
@@ -21,6 +22,8 @@ This project demonstrates a complete CI/CD pipeline for a simple 2-tier Python a
 - AWS ECR and EC2 for cloud deployment
 - GitHub Actions for CI/CD automation
 - The pipeline includes application packaging, testing, publishing to AWS ECR, and deployment to an EC2 production instance.
+
+Idea : Replacing an old image in a runtime environment (EC2) with a new image pulled from the ECR repository with all the necessary steps.
 
 ## Key Features
 - REST API-based application built with Python (Flask)
@@ -59,11 +62,77 @@ This project demonstrates a complete CI/CD pipeline for a simple 2-tier Python a
 
 Requirements for building and running the project:
 
-- AWS CLI configured
-- Docker & Docker Compose installed
 - Python 3.10 installed
-- create manually - EC2 Instance (Amazon Linux 2 preferred)
+- Docker & Docker Compose installed
 - create manually - AWS ECR repository for Docker images
+- create manually - EC2 Instance (Amazon Linux 2 preferred)
+- create IAM role with ECR access for EC2 instance or Set up AWS CLI credentials manually on EC2
+
+
+## Steps
+
+**1. Creation of AWS Infrastructure including ECR, EC2 and IAM role**
+
+**Guide to creating IAM role**
+```
+step 1: Create IAM Role
+Go to the IAM Console → Roles.
+Click Create role.
+Trusted entity type → Choose: AWS service.
+Use case → Choose: EC2.
+Click Next.
+
+Step 2: Attach Policy
+On the “Add permissions” step:
+
+Search for and select the managed policy:
+AmazonEC2ContainerRegistryReadOnly
+(Or, for more access, choose AmazonEC2ContainerRegistryPowerUser)
+
+Then click Next → Name it something like:
+EC2-ECR-Access-Role
+
+Click Create Role.
+
+Step 3: Attach the Role to Your EC2 Instance
+Go to the EC2 dashboard → select your instance.
+Click Actions → Security → Modify IAM Role.
+Choose the role you just created (e.g., EC2-ECR-Access-Role).
+Click Update IAM role.
+```
+
+**2. Send relevant file to run docker compose on EC2 instance using scp command**
+```
+scp -i "**path to key**/entryEc2key.pem" \
+    Dockerfile app.py docker-compose.yaml requirements.txt .env\
+    ec2-user@**ec2 Public IPv4 DNS path**:/home/ec2-user/entryTracker
+```
+
+**3. Connect EC2 instance via ssh command:**
+```
+ssh -i "**path to key**/entryEc2key.pem" ec2-user@**ec2 Public IPv4 DNS path**
+```
+
+**4. Test Docker Login from EC2**
+```
+#for example (can be find on ECR view push commands)
+aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 869870154833.dkr.ecr.us-east-1.amazonaws.com
+
+#output expected 
+Login Succeeded
+```
+
+**5. Install Docker and Docker compose using the reference document attached below**
+
+
+**6. Run in EC2 then check if containers are running**
+
+```docker compose up -d ```
+
+```docker ps -a```
+
+**7. Run The CI/CD workflow**
+
 
 ## CI/CD Pipeline
 
@@ -78,5 +147,9 @@ graph LR
     End_to_End_Tests --> Publish_Image_to_ECR
     Publish_Image_to_ECR --> Set_up_EC2_instance_as_the_production_environment
 ```
+
+## Documentation Sources
+-  [Installing Docker and Docker Compose on Amazon Linux 2 AWS EC2 Instance](https://medium.com/@geeekfa/docker-and-docker-compose-on-aws-linux-2-9e90f79502db)
+
 
 
