@@ -138,7 +138,7 @@ jobs:
               docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
               docker tag 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest application:latest
 
-              echo "ECR_IMAGE=application:latest" > .env
+              echo "ECR_IMAGE=application:latest" >> .env
 
               # #Pull the latest image from ECR
               # echo "ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest" > .env
