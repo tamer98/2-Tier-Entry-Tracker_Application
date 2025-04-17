@@ -144,7 +144,7 @@ jobs:
               # echo "ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest" > .env
 
               docker compose up -d
-              sleep 10
+              sleep 15
               docker ps -a
               
               #tests
