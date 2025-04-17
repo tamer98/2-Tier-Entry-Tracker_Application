@@ -135,9 +135,8 @@ jobs:
               docker ps -a
               
               #Pull the latest image from ECR
-              ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest 
-              docker pull $ECR_IMAGE
-              
+              echo "ECR_IMAGE=569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest" > .env
+
               docker compose up -d
               sleep 10
               docker ps -a
