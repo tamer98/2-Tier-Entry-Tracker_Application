@@ -94,6 +94,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.ECR_SECRET_KEY }}
           aws-region: us-east-1
 
+
+      - name: Authenticate Docker to AWS ECR
+        run: ${{ secrets.DOCKER_AUTENTICATES_ECR_AWS }}
+   
+
 # -----
       # - name: Deploy to EC2
       #   uses: easingthemes/ssh-deploy@main
