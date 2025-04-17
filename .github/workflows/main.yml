@@ -3,6 +3,13 @@ on:
   push:
     branches:
       - main
+
+env:  
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 569870184857.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: development/mid
+  IMAGE_TAG: latest  
+  
 jobs:
   CI:
     runs-on: ubuntu-latest
@@ -61,16 +68,17 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
         
       - name: Authenticate Docker to AWS ECR
         run: ${{ secrets.DOCKER_AUTENTICATES_ECR_AWS }}
-   
+        
+        
       - name: Tag Docker image
-        run: docker tag entrytracker:latest 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
+        run: docker tag entrytracker:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       
       - name: Push Docker image to ECR
-        run: docker push 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
+        run: docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 
   CD:
@@ -87,15 +95,16 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.ECR_SECRET_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
             
       - name: Deploy new version of image on EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST_DNS }} #ec2-100-24-24-197.compute-1.amazonaws.com 
+          host: ${{ secrets.EC2_HOST_DNS }}  
           key: ${{ secrets.EC2_SSH_KEY }}
           username: ec2-user
+          envs: ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG
           script: |
               pushd /home/ec2-user/entryTracker
               docker ps -a
@@ -104,8 +113,8 @@ jobs:
               docker ps -a
 
               echo "Pulling and tagging latest image from ECR"
-              docker pull 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest
-              docker tag 569870184857.dkr.ecr.us-east-1.amazonaws.com/development/mid:latest application:latest
+              docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG application:latest
 
               echo "Appending ECR_IMAGE variable to exist .env file"
               echo "ECR_IMAGE=application:latest" >> .env
