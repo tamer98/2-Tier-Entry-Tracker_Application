@@ -23,7 +23,7 @@ This project demonstrates a complete CI/CD pipeline for a simple 2-tier Python a
 - GitHub Actions for CI/CD automation
 - The pipeline includes application packaging, testing, publishing to AWS ECR, and deployment to an EC2 production instance.
 
-Idea : Replacing an old image in a runtime environment (EC2) with a new image pulled from the ECR repository with all the necessary steps.
+>The idea : Replacing an old image in a runtime environment (EC2) with a new image pulled from the ECR repository with all the necessary steps.
 
 ## Key Features
 - REST API-based application built with Python (Flask)
