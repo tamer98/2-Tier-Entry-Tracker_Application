@@ -43,8 +43,7 @@ This project demonstrates a complete CI/CD pipeline for a simple 2-tier Python a
 -----------------------------------
 **Comprehensive diagram**
 
-![MidProject drawio](https://github.com/user-attachments/assets/f8db4b6c-89be-4490-8628-6652f27c1a7b)
-
+![MidProject drawio](https://github.com/user-attachments/assets/c399a8fb-af51-496c-a9ea-7cdd7da3e7bb)
 
 
 ## Technology Stack
