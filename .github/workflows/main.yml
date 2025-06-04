@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'README.md'
+      - '.github/**'
+
+  workflow_dispatch:
+      
 env:  
   AWS_REGION: us-east-1
   ECR_REGISTRY: 569870184857.dkr.ecr.us-east-1.amazonaws.com
